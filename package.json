@@ -1,0 +1,24 @@
+{
+  "name": "glasgowweatherbot",
+  "version": "1.0.0",
+  "description": "twitter bot that tweets the expected weather in glasgow every few hours",
+  "main": "hourly.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "twitter",
+    "bot",
+    "glasgow",
+    "uk",
+    "weather",
+    "api"
+  ],
+  "author": "JT",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.22.2",
+    "request": "^2.88.0",
+    "twit": "^2.2.11"
+  }
+}
