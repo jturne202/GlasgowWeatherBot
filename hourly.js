@@ -1,47 +1,50 @@
-const request = require('request');
+const request = require('request-promise');
 const moment = require('moment');
 const Twit = require('twit');
+// You must create a keys.js file which exports these below.
+import { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret } from './keys.js'
 
 /*
 Example Tweet
 
-Aug 15th 18
+Aug 15th 2018
 6am: 16°C light rain, 92% cloudy, 15 mph SW
 9am: 17°C light rain, 92% cloudy, 16 mph SW
 12pm: 18°C light rain, 64% cloudy, 19 mph SW
 3pm: 18°C light rain, 68% cloudy, 17 mph SW
 */
 
-
 // Parses weather from openweathermap ready for tweeting
 function getWeather() {
     // Gets hourly weather over the next 5 days in JSON
     // from openweathermap for Glasgow UK
-    request('http://api.openweathermap.org/data/2.5/forecast?q=Glasgow,UK&APPID={key}', function (error, response, body) {
-        console.log('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log();
+    return request(`http://api.openweathermap.org/data/2.5/forecast?q=Glasgow,UK&APPID=${open_weather_map_key}`) 
+        .then(res => {
+            //Store result in JSON Object
+            const obj = JSON.parse(res);
 
-        //Store result in JSON Object
-        const obj = JSON.parse(body);
+            // Gets first result date
+            let weather = moment(obj.list[0].dt_txt).format("MMM Do YYYY") + "\n"; // Aug 15 2018
 
-        // Gets first result date
-        let weather = moment(obj.list[0].dt_txt).format("MMM Do YY") + "\n"; // Aug 15 2018
+            // Gets next 4 weather updates and parses relevant data
+            for (let i = 0; i < 4; i++) {
+                weather +=
+                    moment(obj.list[i].dt_txt).format("ha") + ": " +        // hours + am/pm Eg: 3am
+                    Math.round((obj.list[i].main.temp) - 273.15) + "°C " +  // Temperature Eg: 16°C
+                    obj.list[i].weather[0].description + ", " +             // Weather type Eg: light rain
+                    obj.list[i].clouds.all + "% cloudy, " +                 // Cloud coverage Eg: 92% cloudy
+                    Math.round((obj.list[i].wind.speed) *2.2369) + " mph "  // Wind Speed Eg: 15 mph
+                    + windDirection(obj.list[i].wind.deg) + "\n";           // Wind Direction Eg: SW
+            }
 
-        // Gets next 4 weather updates and parses relevant data
-        for (let i = 0; i < 4; i++) {
-            weather +=
-                moment(obj.list[i].dt_txt).format("ha") + ": " +        // hours + am/pm Eg: 3am
-                Math.round((obj.list[i].main.temp) - 273.15) + "°C " +  //Temperature Eg: 16°C
-                obj.list[i].weather[0].description + ", " +             //Weather type Eg: light rain
-                obj.list[i].clouds.all + "% cloudy, " +                 //Cloud coverage Eg: 92% cloudy
-                Math.round((obj.list[i].wind.speed) *2.2369) + " mph "  //Wind Speed Eg: 15 mph
-                + windDirection(obj.list[i].wind.deg) + "\n";           //Wind Direction Eg: SW
-        }
-
-        console.log(weather)
-    });
-}
+            // console.log(weather);
+            return weather;
+        })
+        .catch(err => {
+            console.log(moment().utc().format(), 'ERROR creating tweet content')
+            console.log(moment().utc().format(), err)
+        });
+};
 
 // Converts wind direction from degrees to cardinal direction
 function windDirection(deg) {
@@ -79,22 +82,32 @@ function windDirection(deg) {
             break;
     }
     return direction;
-}
+};
 
 // Twitter account details
 const T = new Twit({
-    consumer_key:         'YOUR_INFO_HERE',
-    consumer_secret:      'YOUR_INFO_HERE',
-    access_token:         'YOUR_INFO_HERE',
-    access_token_secret:  'YOUR_INFO_HERE',
-    timeout_ms:           60 * 1000,
+    consumer_key,
+    consumer_secret,
+    access_token,
+    access_token_secret,
+    timeout_ms,
 });
 
+// test
+// getWeather().then(weather => {console.log(weather)})
+
 // Tweets the Weather
-T.post(
-    'statuses/update',
-    { status: getWeather() },
-    (err, data, response) => {
-        console.log(err, data, response);
-    }
-);
+getWeather().then(weather => {
+    T.post(
+        'statuses/update',
+        { status: weather },
+        (err, data, response) => {
+            if (err) {
+                console.log(moment().utc().format(), 'ERROR posting tweet')
+                console.log(moment().utc().format(), err)
+            } else {
+                console.log(moment().utc().format(), 'SUCCESSFUL posting tweet')
+            };
+        }
+    );
+});
