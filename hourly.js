@@ -37,7 +37,7 @@ function getWeather() {
                     + windDirection(obj.list[i].wind.deg) + "\n";           // Wind Direction Eg: SW
             }
 
-            weather += '\n#Glasgow#Weather#GlasgowWeather'
+            weather += '\n#Glasgow #Weather #GlasgowWeather'
             return weather;
         })
         .catch(err => {
