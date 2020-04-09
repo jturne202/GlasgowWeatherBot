@@ -1,18 +1,10 @@
 const request = require('request-promise');
 const moment = require('moment');
 const Twit = require('twit');
+const cron = require("node-cron");
+const express = require("express");
 // You must create a keys.js file which exports these below.
 const { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret, timeout_ms } = require('./keys');
-
-/*
-Example Tweet
-
-Aug 15th 2018
-6am: 16°C light rain, 92% cloudy, 15 mph SW
-9am: 17°C light rain, 92% cloudy, 16 mph SW
-12pm: 18°C light rain, 64% cloudy, 19 mph SW
-3pm: 18°C light rain, 68% cloudy, 17 mph SW
-*/
 
 // Parses weather from openweathermap ready for tweeting
 function getWeather() {
@@ -96,18 +88,24 @@ const T = new Twit({
 // test
 // getWeather().then(weather => {console.log(weather)})
 
-// Tweets the Weather
-getWeather().then(weather => {
-    T.post(
-        'statuses/update',
-        { status: weather },
-        (err, data, response) => {
-            if (err) {
-                console.log(moment().utc().format(), 'ERROR posting tweet')
-                console.log(moment().utc().format(), err)
-            } else {
-                console.log(moment().utc().format(), 'SUCCESSFUL posting tweet')
-            };
-        }
-    );
+app = express();
+
+cron.schedule('* */4 * * *', () => {
+    // Tweets the Weather
+    getWeather().then(weather => {
+        T.post(
+            'statuses/update',
+            { status: weather },
+            (err, data, response) => {
+                if (err) {
+                    console.log(moment().utc().format(), 'ERROR posting tweet')
+                    console.log(moment().utc().format(), err)
+                } else {
+                    console.log(moment().utc().format(), 'SUCCESSFUL posting tweet')
+                };
+            }
+        );
+    });
 });
+
+app.listen(process.env.PORT || 3000, () => `Listening on port ${process.env.PORT || 3000}!`);
