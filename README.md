@@ -9,8 +9,4 @@ Aug 15th 18
 12pm: 18°C light rain, 64% cloudy, 19 mph SW  
 3pm: 18°C light rain, 68% cloudy, 17 mph SW  
 
-GlasgowWeatherBot uses Node js with the npm packages *request, moment, and twit*.
-
-**request** is used to get hourly weather updates from openweathermap's API.  
-**moment** is used to handle date time conversions to more readable formats.  
-**Twit** is used to tweet the weather.  
+Feel free to use this for your own city! To do so you must create a keys.js file and export the required fields to hourly.js.
