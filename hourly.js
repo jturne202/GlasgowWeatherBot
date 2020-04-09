@@ -2,7 +2,7 @@ const request = require('request-promise');
 const moment = require('moment');
 const Twit = require('twit');
 // You must create a keys.js file which exports these below.
-import { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret } from './keys.js'
+const { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret, timeout_ms } = require('./keys');
 
 /*
 Example Tweet
