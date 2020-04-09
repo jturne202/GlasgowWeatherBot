@@ -10,7 +10,7 @@ const express = require("express");
 function getWeather() {
     // Gets hourly weather over the next 5 days in JSON
     // from openweathermap for Glasgow UK
-    return request(`http://api.openweathermap.org/data/2.5/forecast?q=Glasgow,UK&APPID=${open_weather_map_key}`) 
+    return request(`http://api.openweathermap.org/data/2.5/forecast?q=Glasgow,UK&APPID=${process.env.OPEN_WEATHER_MAP_KEY}`)
         .then(res => {
             //Store result in JSON Object
             const obj = JSON.parse(res);
@@ -82,7 +82,7 @@ const T = new Twit({
     consumer_secret: process.env.CONSUMER_SECRET,
     access_token: process.env.ACCESS_TOKEN,
     access_token_secret: process.env.ACCESS_TOKEN_SECRET,
-    timeout_ms: process.env.TIMEOUT_MS
+    timeout_ms: 60 * 1000
 });
 
 // test
