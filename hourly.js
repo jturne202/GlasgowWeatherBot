@@ -3,8 +3,8 @@ const moment = require('moment');
 const Twit = require('twit');
 const cron = require("node-cron");
 const express = require("express");
-// You must create a keys.js file which exports these below.
-const { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret, timeout_ms } = require('./keys');
+// You must create a keys.js file which exports these below, unless using environment variables.
+// const { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret, timeout_ms } = require('./keys');
 
 // Parses weather from openweathermap ready for tweeting
 function getWeather() {
@@ -78,11 +78,11 @@ function windDirection(deg) {
 
 // Twitter account details
 const T = new Twit({
-    consumer_key,
-    consumer_secret,
-    access_token,
-    access_token_secret,
-    timeout_ms,
+    consumer_key: process.env.CONSUMER_KEY,
+    consumer_secret: process.env.CONSUMER_SECRET,
+    access_token: process.env.ACCESS_TOKEN,
+    access_token_secret: process.env.ACCESS_TOKEN_SECRET,
+    timeout_ms: process.env.TIMEOUT_MS
 });
 
 // test
