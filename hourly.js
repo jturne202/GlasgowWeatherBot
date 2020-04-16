@@ -4,13 +4,14 @@ const Twit = require('twit');
 const cron = require("node-cron");
 const express = require("express");
 // You must create a keys.js file which exports these below, unless using environment variables.
-// const { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret, timeout_ms } = require('./keys');
+const { open_weather_map_key, consumer_key, consumer_secret, access_token, access_token_secret, timeout_ms } = require('./keys');
 
 // Parses weather from openweathermap ready for tweeting
 function getWeather() {
     // Gets hourly weather over the next 5 days in JSON
     // from openweathermap for Glasgow UK
-    return request(`http://api.openweathermap.org/data/2.5/forecast?q=Glasgow,UK&APPID=${process.env.OPEN_WEATHER_MAP_KEY}`)
+    // return request(`http://api.openweathermap.org/data/2.5/forecast?q=Glasgow,UK&APPID=${process.env.OPEN_WEATHER_MAP_KEY}`)
+    return request(`http://api.openweathermap.org/data/2.5/forecast?q=Glasgow,UK&APPID=${open_weather_map_key}`)
         .then(res => {
             //Store result in JSON Object
             const obj = JSON.parse(res);
@@ -76,23 +77,32 @@ function windDirection(deg) {
     return direction;
 };
 
-// Twitter account details
+// Twitter account details using imported keys
 const T = new Twit({
-    consumer_key: process.env.CONSUMER_KEY,
-    consumer_secret: process.env.CONSUMER_SECRET,
-    access_token: process.env.ACCESS_TOKEN,
-    access_token_secret: process.env.ACCESS_TOKEN_SECRET,
+    consumer_key,
+    consumer_secret,
+    access_token,
+    access_token_secret,
     timeout_ms: 60 * 1000
 });
 
-// test
-// getWeather().then(weather => {console.log(weather)})
+// Twitter account details using environment variables
+// const T = new Twit({
+//     consumer_key: process.env.CONSUMER_KEY,
+//     consumer_secret: process.env.CONSUMER_SECRET,
+//     access_token: process.env.ACCESS_TOKEN,
+//     access_token_secret: process.env.ACCESS_TOKEN_SECRET,
+//     timeout_ms: 60 * 1000
+// });
 
 app = express();
 
-cron.schedule('* */4 * * *', () => {
+// Run cron job every 4 hours
+cron.schedule('0 */4 * * *', () => {
+    console.log(moment().utc().format(), 'Running cron job')
     // Tweets the Weather
     getWeather().then(weather => {
+        // console.log(weather);
         T.post(
             'statuses/update',
             { status: weather },
